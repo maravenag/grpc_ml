@@ -5,8 +5,10 @@ import grpc
 import sys
 import time
 import requests as re
+import os
 
-CHANNEL = grpc.insecure_channel('[::]:8080')
+GRPC_SERVER_ADDRESS = os.environ["GRPC_SERVER_ADDRESS"]
+CHANNEL = grpc.insecure_channel(f'{GRPC_SERVER_ADDRESS}:8080')
 
 def main():
     stub = service_pb2_grpc.ModelPredictionStub(CHANNEL)

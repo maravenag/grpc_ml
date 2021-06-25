@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+service ModelPrediction {
+  rpc predict (ModelParams) returns (ModelResponse) {}
+}
+
+message ModelParams {
+  float sepal_length = 1;
+  float sepal_width = 2;
+  float petal_length = 3;
+  float petal_width = 4;
+}
+
+message ModelResponse {
+  bool success = 1;
+  int32 predicted_class = 2;
+}

@@ -5,10 +5,13 @@ from concurrent import futures
 import service_pb2_grpc
 import service_pb2
 import logging
+import os
+
+_PORT = os.environ["PORT"]
 
 class ModelPredictionServicer(service_pb2_grpc.ModelPredictionServicer):
     def __init__(self):
-        self.model = pickle.load(open("model/model.pkl", 'rb'))
+        self.model = pickle.load(open("/root/app/model/model.pkl", 'rb'))
     
     def predict(self, request, context):
         to_predict_data = np.array([request.sepal_length,
@@ -26,13 +29,15 @@ class ModelPredictionServicer(service_pb2_grpc.ModelPredictionServicer):
             response.success = False
             return response
 
-def serve():
-  server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-  service_pb2_grpc.add_ModelPredictionServicer_to_server(ModelPredictionServicer(), server)
-  server.add_insecure_port('[::]:8080')
-  server.start()
-  server.wait_for_termination()
+def serve(port:str):
+    bind_address = f"[::]:{port}"
+    server = grpc.server(futures.ThreadPoolExecutor())
+    service_pb2_grpc.add_ModelPredictionServicer_to_server(ModelPredictionServicer(), server)
+    server.add_insecure_port(bind_address)
+    server.start()
+    logging.info("Listening on %s.", bind_address)
+    server.wait_for_termination()
 
 if __name__ == "__main__":
-    logging.basicConfig()
-    serve()
+    logging.basicConfig(level=logging.INFO)
+    serve(_PORT)
